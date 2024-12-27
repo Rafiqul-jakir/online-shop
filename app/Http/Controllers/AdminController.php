@@ -41,7 +41,7 @@ class AdminController extends Controller
         $image = $request->file('image');
         $file_extension = $request->file('image')->extension();
         $file_name = Carbon::now()->timestamp . '.' . $file_extension;
-        $this->GenerateBrandThumbnailsImage($image, $file_name);
+        $this->GenerateBrandThumbnailsImage($image, $file_name, 'uploads/brands');
         $brand->image = $file_name;
         $brand->save();
         return redirect()->route('admin.brands')->with('status', 'Brand has been added successfully!');
@@ -69,7 +69,7 @@ class AdminController extends Controller
             $image = $request->file('image');
             $file_extension = $request->file('image')->extension();
             $file_name = Carbon::now()->timestamp . '.' . $file_extension;
-            $this->GenerateBrandThumbnailsImage($image, $file_name);
+            $this->GenerateBrandThumbnailsImage($image, $file_name, 'uploads/brands');
             $brand->image = $file_name;
         }
 
@@ -77,9 +77,9 @@ class AdminController extends Controller
         return redirect()->route('admin.brands')->with('status', 'Brand has been updated successfully!');
     }
 
-    public function GenerateBrandThumbnailsImage($image, $imageName)
+    public function GenerateBrandThumbnailsImage($image, $imageName, $path)
     {
-        $destinationPath = public_path('uploads/brands');
+        $destinationPath = public_path($path);
         $img = Image::read($image->path());
         $img->cover(124, 124, "top");
         $img->resize(124, 124, function ($constraint) {
@@ -100,5 +100,27 @@ class AdminController extends Controller
     {
         $categories = category::orderBy('id', 'DESC')->paginate(10);
         return view('admin.categories', compact('categories'));
+    }
+    public function category_add()
+    {
+        return view('admin.category_add');
+    }
+    public function category_store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'slug' => 'required|unique:categories,slug',
+            'image' => 'mimes:png,jpg,jpeg|max:2048',
+        ]);
+        $category = new category();
+        $category->name = $request->name;
+        $category->slug = Str::slug($request->slug);
+        $image = $request->file('image');
+        $file_extension = $request->file('image')->extension();
+        $file_name = Carbon::now()->timestamp . '.' . $file_extension;
+        $this->GenerateBrandThumbnailsImage($image, $file_name, 'uploads/categories');
+        $category->image = $file_name;
+        $category->save();
+        return redirect()->route('admin.categories')->with('status', 'Category has been added successfully!');
     }
 }
