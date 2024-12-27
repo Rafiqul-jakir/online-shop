@@ -28,4 +28,6 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
     Route::get('/admin/category/add', [AdminController::class, 'category_add'])->name('admin.category_add');
     Route::post('/admin/category/store', [AdminController::class, 'category_store'])->name('admin.category_store');
+    Route::get('/admin/category/edit/{id}', [AdminController::class, 'category_edit'])->name('admin.category_edit');
+    Route::put('/admin/category/update', [AdminController::class, 'category_update'])->name('admin.category_update');
 });

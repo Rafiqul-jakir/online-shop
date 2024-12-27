@@ -123,4 +123,33 @@ class AdminController extends Controller
         $category->save();
         return redirect()->route('admin.categories')->with('status', 'Category has been added successfully!');
     }
+    public function category_edit($id)
+    {
+        $category = category::find($id);
+        return view('admin.category_edit', compact('category'));
+    }
+    public function category_update(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'slug' => 'required|unique:categories,slug',
+            'image' => 'mimes:png,jpg,jpeg|max:2048',
+        ]);
+        $category = category::find($request->category_update_id);
+        $category->name = $request->name;
+        $category->slug = Str::slug($request->slug);
+        if ($request->hasFile('image')) {
+            if (File::exists(public_path('uploads/categories') . '/' . $category->image)) {
+                File::delete(public_path('uploads/categories') . '/' . $category->image);
+            }
+            $image = $request->file('image');
+            $file_extension = $request->file('image')->extension();
+            $file_name = Carbon::now()->timestamp . '.' . $file_extension;
+            $this->GenerateBrandThumbnailsImage($image, $file_name, 'uploads/categories');
+            $category->image = $file_name;
+        }
+
+        $category->save();
+        return redirect()->route('admin.categories')->with('status', 'Categories has been updated successfully!');
+    }
 }
